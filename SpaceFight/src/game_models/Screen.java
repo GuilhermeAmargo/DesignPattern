@@ -18,6 +18,8 @@ public class Screen extends JPanel implements ActionListener {
     private Main main;
     private Font gameFont;
 
+    private ScreenState currentState;
+
     public Screen(Main main) {
         this.main = main;
         setLayout(null); // Usamos layout absoluto para posicionar os componentes manualmente
@@ -37,6 +39,16 @@ public class Screen extends JPanel implements ActionListener {
         // Inicializa o botão "BACK"
         backButton = createButton("BACK", 0, 0, 200, 50); // Posição inicial arbitrária
         backButton.addActionListener(this);
+
+        currentState = new HomeScreenState();
+    }
+
+    public Main getMain() {
+        return main;  // Retorna a referência ao objeto 'main'
+    }
+
+    public JButton getBackButton() {
+        return backButton;  // Retorna o objeto 'backButton'
     }
 
     // Método para carregar a fonte personalizada
@@ -76,54 +88,16 @@ public class Screen extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == startButton) {
-            showGamePhase(); // Mostra a fase do jogo
+            currentState = new GamePhaseState(); // Mostra a fase do jogo
         } else if (e.getSource() == aboutButton) {
-            showAboutScreen(); // Mostra a tela "Sobre"
+            currentState = new AboutScreenState(); // Mostra a tela "Sobre"
         } else if (e.getSource() == exitButton) {
             System.exit(0); // Sai do jogo
         } else if (e.getSource() == backButton) {
-            showHomeScreen(); // Volta para a tela inicial
+            currentState = new HomeScreenState(); // Volta para a tela inicial
         }
-    }
 
-    // Método para mostrar a fase do jogo
-    private void showGamePhase() {
-        main.getContentPane().removeAll(); // Remove todos os componentes da tela principal
-        Phase phase = new Phase(); // Cria um novo painel da fase
-        main.getContentPane().add(phase); // Adiciona a fase à tela principal
-        main.revalidate();
-        main.repaint();
-        phase.requestFocusInWindow(); // Define o foco na nova fase
-    }
-
-    // Método para mostrar a tela "Sobre"
-    private void showAboutScreen() {
-        main.getContentPane().removeAll(); // Remove todos os componentes da tela principal
-
-        // Cria um JLabel para exibir a imagem
-        ImageIcon aboutImage = new ImageIcon("res/tela_aboutscreen.png");
-        JLabel imageLabel = new JLabel(aboutImage);
-        backButton.setBounds(790, 500, 200, 50); // Define a posição do botão "BACK"
-
-        imageLabel.setBounds(0, 0, aboutImage.getIconWidth(), aboutImage.getIconHeight()); // Define a posição da imagem
-
-        // Cria um novo painel para a tela "Sobre"
-        JPanel aboutPanel = new JPanel(null);
-        aboutPanel.add(backButton); // Adiciona o botão "BACK" ao painel "Sobre"
-        aboutPanel.add(imageLabel); // Adiciona a imagem ao painel "Sobre"
-
-        main.getContentPane().add(aboutPanel); // Adiciona o painel "Sobre" à janela principal
-
-        main.revalidate();
-        main.repaint(); // Revalida e redesenha a janela principal
-    }
-
-    // Método para mostrar a tela inicial
-    private void showHomeScreen() {
-        main.getContentPane().removeAll(); // Remove todos os componentes da tela principal
-        main.getContentPane().add(new Screen(main)); // Adiciona uma nova instância da tela inicial
-        main.revalidate();
-        main.repaint(); // Revalida e redesenha a janela principal
+        currentState.showScreen(this);
     }
 
     // Classe interna para definir a UI personalizada dos botões

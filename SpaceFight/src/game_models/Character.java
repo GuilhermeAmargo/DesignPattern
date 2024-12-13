@@ -15,19 +15,22 @@ public abstract class Character {
     }
 
     //Imagem e tamanho do personagem
-    public void load(String imagePath){
+    public final void loadCharacter(String imagePath){
+        loadImage(imagePath);
+        onCharacterLoaded();
+    }
+
+    private void loadImage (String imagePath){
         ImageIcon reference = new ImageIcon(imagePath);
         image = reference.getImage();
         height = image.getHeight(null);
         width = image.getWidth(null);
     }
 
+    protected  abstract void onCharacterLoaded();
+
     public Image getImage() {
         return image;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
     }
 
     public int getX() {
@@ -49,22 +52,9 @@ public abstract class Character {
     public int getHeight() {
         return height;
     }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
     public int getWidth() {
         return width;
     }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    // Carrega a imagem selecionada
-    public abstract void load();
-
     // Obtém os limites para detecção de colisão
     public abstract Rectangle getBounds();
 }

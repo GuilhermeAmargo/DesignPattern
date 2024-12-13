@@ -1,6 +1,7 @@
 package game_models;
 
 import java.awt.*;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 
 public class Asteroid extends Character {
@@ -30,9 +31,13 @@ public class Asteroid extends Character {
     }
 
     // Carrega a imagem selecionada
-    @Override
     public void load() {
-        super.load(imageFile);
+        super.loadCharacter(imageFile);
+    }
+
+    @Override
+    protected void onCharacterLoaded(){
+        System.out.println("Asteroide carregado na posição: "+ getX() +", "+getY());
     }
 
     // Obtém os limites para detecção de colisão

@@ -3,96 +3,112 @@ package game_models;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Spacecraft extends Character {
 
     private int dx, dy;
     private boolean isVisible;
     private List<Shoot> shoots;
-    private final int SCREEN_WIDTH = 1024;  // Largura da tela
-    private final int SCREEN_HEIGHT = 728;  // Altura da tela
+    private final int SCREEN_WIDTH = 1024;
+    private final int SCREEN_HEIGHT = 728;
     private long lastShotTime;
-    private final int SHOT_DELAY = 300;  // Intervalo mínimo entre os tiros em milissegundos
+    private final int SHOT_DELAY = 300;
+    private Map<Integer, Command> commandMap;
 
-    // Construtor da espaçonave, que coloca a posição que será gerado, coloca a espaçonave visivel, cria um array list de tiros e coloca a variavel lastShotTime com 0
     public Spacecraft(int x, int y) {
         super(x, y);
         isVisible = true;
-        shoots = new ArrayList<Shoot>();
-        lastShotTime = 0; // Inicializa com zero
+        shoots = new ArrayList<>();
+        lastShotTime = 0;
+        commandMap = new HashMap<>();
+        initializeCommands();
     }
 
-    // Carrega a imagem e o tamanho da espaçonave
+    private void initializeCommands() {
+        // Movimentos
+        commandMap.put(KeyEvent.VK_UP, () -> setDy(-4)); // Movimento para cima
+        commandMap.put(KeyEvent.VK_DOWN, () -> setDy(4)); // Movimento para baixo
+        commandMap.put(KeyEvent.VK_LEFT, () -> setDx(-4)); // Movimento para a esquerda
+        commandMap.put(KeyEvent.VK_RIGHT, () -> setDx(4)); // Movimento para a direita
+
+        // Parar movimentos
+        commandMap.put(KeyEvent.VK_UP + 1000, () -> setDy(0));
+        commandMap.put(KeyEvent.VK_DOWN + 1000, () -> setDy(0));
+        commandMap.put(KeyEvent.VK_LEFT + 1000, () -> setDx(0));
+        commandMap.put(KeyEvent.VK_RIGHT + 1000, () -> setDx(0));
+
+        // Comando para atirar
+        commandMap.put(KeyEvent.VK_Z, this::singleShot); // Tiro ao pressionar espaço
+    }
+
+    @Override
+    protected void onCharacterLoaded() {
+        // Configurações adicionais após o carregamento do personagem
+    }
+
     public void load() {
-        super.load("res\\spacecraft.gif");
+        super.loadCharacter("res\\spacecraft.gif");
     }
 
-    // Cria um retangulo para ser checado a colisão
+    @Override
     public Rectangle getBounds() {
         return new Rectangle(getX() - 5, getY() + 20, getWidth(), getHeight());
     }
 
-    // Movimentação da espaçonave e colisão com as bordas da tela
     public void move() {
         int newX = getX() + dx;
         int newY = getY() + dy;
 
-        if (newX >= 0 - (getWidth() * 0) && newX <= SCREEN_WIDTH - (getWidth() * 1.2)) {
-            super.setX(newX);
+        if (newX >= 0 && newX <= SCREEN_WIDTH - getWidth()) {
+            setX(newX);
         }
-        if (newY >= 0 - (getHeight() * 0.2) && newY <= SCREEN_HEIGHT - (getHeight() * 0.9)) {
-            super.setY(newY);
+        if (newY >= 0 && newY <= SCREEN_HEIGHT - getHeight()) {
+            setY(newY);
         }
     }
 
-    // Método do tiro da espaçonave com controle de delay
     public void singleShot() {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastShotTime >= SHOT_DELAY) {
-            this.shoots.add(new Shoot(getX() + getWidth() - 42, getY() + getHeight() - 54));
-            lastShotTime = currentTime;  // Atualiza o tempo do último tiro
+            shoots.add(new Shoot(getX() + getWidth() - 42, getY() + getHeight() - 54));
+            lastShotTime = currentTime;
             Sound.soundShoot.play();
         }
     }
 
-    // Teclas da espaçonave e sua velocidade de movimento
     public void keyPressed(KeyEvent tecla) {
         int code = tecla.getKeyCode();
-
-        if (code == KeyEvent.VK_Z) {
-            singleShot();
-        }
-        if (code == KeyEvent.VK_UP) {
-            dy = -4;
-        }
-        if (code == KeyEvent.VK_DOWN) {
-            dy = 4;
-        }
-        if (code == KeyEvent.VK_RIGHT) {
-            dx = 4;
-        }
-        if (code == KeyEvent.VK_LEFT) {
-            dx = -4;
+        Command command = commandMap.get(code);
+        if (command != null) {
+            command.execute();
         }
     }
 
-    // Teclas não pressionadas
     public void keyRelease(KeyEvent tecla) {
         int code = tecla.getKeyCode();
+        Command command = commandMap.get(code + 1000);
+        if (command != null) {
+            command.execute();
+        }
+    }
 
-        if (code == KeyEvent.VK_UP) {
-            dy = 0;
-        }
-        if (code == KeyEvent.VK_DOWN) {
-            dy = 0;
-        }
-        if (code == KeyEvent.VK_RIGHT) {
-            dx = 0;
-        }
-        if (code == KeyEvent.VK_LEFT) {
-            dx = 0;
-        }
+    public void setDx(int dx) {
+        this.dx = dx;
+    }
+
+    public void setDy(int dy) {
+        this.dy = dy;
+    }
+
+    public int getDx() {
+        return dx;
+    }
+
+    public int getDy() {
+        return dy;
     }
 
     public List<Shoot> getShoots() {

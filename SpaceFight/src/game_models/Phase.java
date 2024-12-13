@@ -29,10 +29,13 @@ public class Phase extends JPanel implements ActionListener {
     private long roundTextStartTime;
     private final int roundTextDuration = 1300; //Duração em milissegundos
     private int currentRound = 1;
+    private AsteroidFactory asteroidFactory;
 
     public Phase() {
         setFocusable(true);
         setDoubleBuffered(true);
+
+        asteroidFactory = new SimpleAsteroidFactory();
 
         //Fonte das letras
         try {
@@ -100,10 +103,7 @@ public class Phase extends JPanel implements ActionListener {
         for (int i = 0; i < numAsteroids; i++) {
             int x = (int) (Math.random() * (920));
             int y = -728 - (int) (Math.random() * 100);
-
-            Asteroid asteroid = new Asteroid(x, y);
-            asteroid.load(); //Carrega a imagem e o tamanho dela
-            asteroids.add(asteroid); //Adiciona o asteroid
+            asteroids.add(asteroidFactory.createAsteroid(x, y));
         }
     }
 
@@ -133,7 +133,7 @@ public class Phase extends JPanel implements ActionListener {
             List<Shoot> shoots = spacecraft.getShoots();
             for (int i = 0; i < shoots.size(); i++) {
                 Shoot m = shoots.get(i);
-                m.load();
+                m.loadCharacter("res\\shoot.png");
                 graficos.drawImage(m.getImage(), m.getX(), m.getY(), this);
             }
 
