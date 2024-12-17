@@ -698,6 +698,6 @@ public class AsteroidFactoryTest {
 ```
 ## Authors
 
-- Guilherme Camardo Silva
+- Guilherme Camargo Silva
 - João Pedro V. A.
 - Thomas V. Steinhoff
